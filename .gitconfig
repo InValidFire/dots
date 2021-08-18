@@ -1,0 +1,13 @@
+[alias]
+	a = add
+	br = branch
+	c = commit
+	um = commit --amend
+[user]
+	useConfigOnly = true
+	email = invalidfire@fastmail.com
+	name = riley
+[init]
+	defaultBranch = main
+[core]
+	editor = vim
