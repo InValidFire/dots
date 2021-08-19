@@ -42,6 +42,11 @@ set number
 "NERDTree shortcuts
 nnoremap <C-t> :NERDTreeToggle<CR>
 
+"Language server junk
+let g:lsc_server_commands = {'py': 'pyls'}
+
+let g:lsc_auto_map = v:true
+
 "plugins
 call plug#begin('~/.vim/plugged')
 
@@ -49,5 +54,6 @@ Plug 'airblade/vim-gitgutter'
 Plug 'preservim/nerdtree'
 Plug 'ycm-core/YouCompleteMe'
 Plug 'chiel92/vim-autoformat'
+Plug 'natebosch/vim-lsc'
 
 call plug#end()

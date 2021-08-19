@@ -136,8 +136,8 @@ ex ()
   fi
 }
 # --- my modifications ---
-source .bash/aliases
-source .bash/funcs
+source "$HOME/.bash/aliases"
+source "$HOME/.bash/funcs"
 
 if [ -f "$HOME/bw_key" ] ; then
 	source $HOME/bw_key
