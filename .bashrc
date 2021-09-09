@@ -146,3 +146,5 @@ fi
 if [ -d "$HOME/bin" ] ; then
     PATH="$HOME/bin:$PATH"
 fi
+
+alias bwget="bw get $1 $2 | xclip -sel clip"
