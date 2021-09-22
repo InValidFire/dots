@@ -4,6 +4,14 @@ $XONSH_COLOR_STYLE = 'fruity'
 xontrib load apt_tabcomplete argcomplete autovox jedi z
 # XONSH WEBCONFIG END
 
+# path stuff
+
+import sys
+sys.path.insert(0, '')
+sys.path.append(Path("~/addins").resolve())
+
+import addins
+
 # debug
 def _debug():
 	if $XONSH_SHOW_TRACEBACK:
@@ -31,3 +39,6 @@ aliases['bwc'] = _bwc
 # dots
 
 aliases['config'] = '/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
+
+# ls
+aliases['ls'] = 'ls -alhs --color=auto'
