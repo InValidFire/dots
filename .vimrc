@@ -52,7 +52,7 @@ call plug#begin('~/.vim/plugged')
 
 Plug 'airblade/vim-gitgutter'
 Plug 'preservim/nerdtree'
-Plug 'ycm-core/YouCompleteMe'
+Plug 'ycm-core/YouCompleteMe', { 'do': './install.py' }
 Plug 'chiel92/vim-autoformat'
 Plug 'natebosch/vim-lsc'
 
