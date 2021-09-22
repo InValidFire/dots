@@ -1,0 +1,33 @@
+# XONSH WEBCONFIG START
+$PROMPT = '{RED} <3 {RESET}| {BOLD_GREEN}{cwd_base}{RESET} ) '
+$XONSH_COLOR_STYLE = 'fruity'
+xontrib load apt_tabcomplete argcomplete autovox jedi z
+# XONSH WEBCONFIG END
+
+# debug
+def _debug():
+	if $XONSH_SHOW_TRACEBACK:
+		$XONSH_SHOW_TRACEBACK = False
+		print("Debug mode disabled.")
+	else:
+		$XONSH_SHOW_TRACEBACK = True
+		print("Debug mode enabled.")
+
+aliases['debug'] = _debug
+
+# bitwarden shit
+def _bwc(object : str, id : str):
+	if p'~/.bw_session'.exists():
+		if $XONSH_SHOW_TRACEBACK:
+			print("loaded .bw_session")
+		source ~/.bw_session
+	output = $(bw get @(object) @(id))
+	$(echo @(output) | xclip -sel clipboard)
+	return output
+
+aliases['bwg'] = _bwc  # legacy alias
+aliases['bwc'] = _bwc
+
+# dots
+
+aliases['config'] = '/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
