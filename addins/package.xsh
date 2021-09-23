@@ -19,7 +19,7 @@ class Package:
 			else:
 				return False
 		if self.source == 'npm':
-			if !(npm list -g @(self.name)).returncode == 0:
+			if !(npm list -g --parseable --silent @(self.name)).returncode == 0:
 				return True
 			else:
 				return False
@@ -29,12 +29,12 @@ class Package:
 	def install(self):
 		if self.installed:	
 			print(f"package '{self.name}' already installed.")
-			return
 		elif self.source == 'apt':
 			$(sudo apt-get install -qq --yes @(self.name))
 		elif self.source == 'npm':
-			$(npm install -g @(self.name))
+			$(npm install -g --silent --yes @(self.name))
 		elif self.source == 'pacman':
 			$(pacman -Syu @(self.name))
 		else:
 			print(f"unsupported package manager '{source}'.")
+			
