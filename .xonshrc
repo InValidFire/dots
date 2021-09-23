@@ -1,16 +1,29 @@
-# XONSH WEBCONFIG START
+# general shit
 $PROMPT = '{RED} <3 {RESET}| {BOLD_GREEN}{cwd_base}{RESET} ) '
 $XONSH_COLOR_STYLE = 'fruity'
 xontrib load apt_tabcomplete argcomplete autovox jedi z
-# XONSH WEBCONFIG END
 
 # path stuff
 
-import sys
-sys.path.insert(0, '')
-sys.path.append(Path("~/addins").resolve())
+$PATH.insert(0, '')
+$PATH.extend([
+	'~/addins',
+	'~/.local/bin',
+	'~/bin',
+])
 
-import addins
+import addins # my extra stuffs :p
+
+def _colortest():
+	import sys
+	for i in range(256):
+		sys.stdout.write(f"\033[48;5;{i}m   ")
+		if (i+1) % 16 == 0:
+			sys.stdout.write("\033[0m\n")
+
+# tmux
+if !(which tmux) and $TERM != 'tmux-256color': 
+	tmux -2 new-session -A -s main
 
 # debug
 def _debug():
@@ -21,24 +34,34 @@ def _debug():
 		$XONSH_SHOW_TRACEBACK = True
 		print("Debug mode enabled.")
 
-aliases['debug'] = _debug
-
 # bitwarden shit
 def _bwc(object : str, id : str):
 	if p'~/.bw_session'.exists():
 		if $XONSH_SHOW_TRACEBACK:
 			print("loaded .bw_session")
 		source ~/.bw_session
+	else:
+		raise FileNotFoundError("~/.bw_session")
 	output = $(bw get @(object) @(id))
 	$(echo @(output) | xclip -sel clipboard)
 	return output
 
-aliases['bwg'] = _bwc  # legacy alias
-aliases['bwc'] = _bwc
+# aliases
+aliases.update({
+	'bwg': _bwc,
+	'bwc': _bwc,
+	'colortest': _colortest,
+	'config': '/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME',
+	'debug': _debug,
+	'ls': 'ls -alhs --color=auto',
+	':q': 'exit',
+})
 
-# dots
-
-aliases['config'] = '/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
-
-# ls
-aliases['ls'] = 'ls -alhs --color=auto'
+# man page colors :O
+$LESS_TERMCAP_mb = "\033[01;31m"     # begin blinking
+$LESS_TERMCAP_md = "\033[01;31m"     # begin bold
+$LESS_TERMCAP_me = "\033[0m"         # end mode
+$LESS_TERMCAP_so = "\033[01;44;36m"  # begin standout-mode (bottom of screen)
+$LESS_TERMCAP_se = "\033[0m"         # end standout-mode
+$LESS_TERMCAP_us = "\033[00;36m"     # begin underline
+$LESS_TERMCAP_ue = "\033[0m"         # end underline

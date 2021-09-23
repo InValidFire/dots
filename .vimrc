@@ -2,14 +2,26 @@
 
 let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
 if empty(glob(data_dir . '/autoload/plug.vim'))
-  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+	silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+	autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
+
+if exists('$TMUX')
+	" Colors in tmux
+	let &t_8f = "\033[38;2;%lu;%lu;%lum"
+	let &t_8b = "\033[48;2;%lu;%lu;%lum"
+endif
+
+packadd! dracula
+set termguicolors
+set background=dark
+syntax enable
+colorscheme dracula
 
 " Install vim-plug if not found
 if empty(glob('~/.vim/autoload/plug.vim'))
-  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
-    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+	silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+	\ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 endif
 
 " Run PlugInstall if there are missing plugins
@@ -55,5 +67,6 @@ Plug 'preservim/nerdtree'
 Plug 'ycm-core/YouCompleteMe', { 'do': './install.py' }
 Plug 'chiel92/vim-autoformat'
 Plug 'natebosch/vim-lsc'
+Plug 'https://tildegit.org/sloum/gemini-vim-syntax'
 
 call plug#end()
