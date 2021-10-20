@@ -5,12 +5,17 @@ xontrib load apt_tabcomplete argcomplete autovox jedi z
 
 # path stuff
 
-$PATH.insert(0, '')
-$PATH.extend([
-	'~/addins',
-	'~/.local/bin',
-	'~/bin',
-])
+def load_path():
+	import sys
+	$PATH.extend([
+		'~/addins',
+		'~/.local/bin',
+		'~/bin',
+		'~/go/bin'
+	])
+	sys.path.insert(0, '')
+
+load_path()
 
 import addins # my extra stuffs :p
 
@@ -37,16 +42,20 @@ def _debug():
 		print("Debug mode enabled.")
 
 # bitwarden shit
-def _bwc(object : str, id : str):
+def _bwc(object : str, bw_id: str):
 	if p'~/.bw_session'.exists():
 		if $XONSH_SHOW_TRACEBACK:
 			print("loaded .bw_session")
 		source ~/.bw_session
 	else:
 		raise FileNotFoundError("~/.bw_session")
-	output = $(bw get @(object) @(id))
+	output = $(bw get @(object) @(bw_id))
 	$(echo @(output) | xclip -sel clipboard)
-	return output
+	if "password" in object and !(bw get totp @(object[1]) a> /dev/null):
+		input("totp found, press any key to copy totp ")
+		output = $(bw get totp @(object[1]))
+		$(echo @(output) | xclip -sel clipboard)
+	#  return output
 
 # aliases
 aliases.update({
@@ -57,6 +66,7 @@ aliases.update({
 	'debug': _debug,
 	'ls': 'ls -alhs --color=auto',
 	':q': 'exit',
+  'owo': 'echo uwu',
 })
 
 # man page colors :O

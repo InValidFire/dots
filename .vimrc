@@ -39,7 +39,7 @@ set splitright
 "nnoremap <C-H> <C-W><C-H>
 
 "formatting
-set tabstop=4
+set tabstop=2
 set softtabstop=0 noexpandtab
 set shiftwidth=4
 
@@ -55,7 +55,7 @@ set number
 nnoremap <C-t> :NERDTreeToggle<CR>
 
 "Language server junk
-let g:lsc_server_commands = {'py': 'pyls'}
+let g:lsc_server_commands = {'py': 'pyls', 'xsh': 'pyls'}
 
 let g:lsc_auto_map = v:true
 
