@@ -12,11 +12,9 @@ if exists('$TMUX')
 	let &t_8b = "\033[48;2;%lu;%lu;%lum"
 endif
 
-packadd! dracula
 set termguicolors
 set background=dark
 syntax enable
-colorscheme dracula
 
 " Install vim-plug if not found
 if empty(glob('~/.vim/autoload/plug.vim'))
@@ -72,3 +70,5 @@ Plug 'https://tildegit.org/sloum/gemini-vim-syntax'
 Plug 'dracula/vim', { 'as': 'dracula'}
 
 call plug#end()
+
+colorscheme dracula
