@@ -1,6 +1,6 @@
 # general shit
 if $HOSTNAME != "riley-laptop":
-	$PROMPT = '<> {RESET}| {BOLD_GREEN}{cwd_base}{RESET}'
+	$PROMPT = '{RED} <> {RESET}| {BOLD_GREEN}{cwd_base}{RESET} ) '
 else:
 	$PROMPT = '{RED} <3 {RESET}| {BOLD_GREEN}{cwd_base}{RESET} ) '
 $XONSH_COLOR_STYLE = 'default'
