@@ -6,7 +6,7 @@ if empty(glob(data_dir . '/autoload/plug.vim'))
 	autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
-if exists('$TMUX')
+if $TERM == 'tmux-256color'
 	" Colors in tmux
 	let &t_8f = "\033[38;2;%lu;%lu;%lum"
 	let &t_8b = "\033[48;2;%lu;%lu;%lum"
