@@ -1,5 +1,8 @@
 # general shit
-$PROMPT = '{RED} <3 {RESET}| {BOLD_GREEN}{cwd_base}{RESET} ) '
+if $HOSTNAME != "riley-laptop":
+	$PROMPT = '<> {RESET}| {BOLD_GREEN}{cwd_base}{RESET}'
+else:
+	$PROMPT = '{RED} <3 {RESET}| {BOLD_GREEN}{cwd_base}{RESET} ) '
 $XONSH_COLOR_STYLE = 'default'
 xontrib load apt_tabcomplete argcomplete autovox jedi z
 
