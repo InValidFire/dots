@@ -57,6 +57,21 @@ def _bwc(object : str, bw_id: str):
 		$(echo @(output) | xclip -sel clipboard)
 	#  return output
 
+def _ensure_tmux(args: list):
+	if $XONSH_SHOW_TRACEBACK:
+		print(args)
+	if not $(tmux has-session -t @(args[0])):
+		tmux new-session -d -s @(args[0]) all> /dev/null
+		$(tmux send-keys -t @(args[0]) @(f"cd {args[1]}") C-m)
+		$(tmux send-keys -t @(args[0]) @(f"{args[2]}") C-m)
+
+def _alias():
+	for alias in aliases:
+		if callable(aliases[alias]):
+			print(alias + " = ", aliases[alias].__name__)
+		else:
+			print(alias + " =", " ".join(aliases[alias]))
+
 # aliases
 aliases.update({
 	'bwg': _bwc,
@@ -67,6 +82,8 @@ aliases.update({
 	'ls': 'ls -alhs --color=auto',
 	':q': 'exit',
   'owo': 'echo uwu',
+	'ensure-tmux': _ensure_tmux,
+	'alias': _alias,
 })
 
 # man page colors :O
