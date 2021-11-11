@@ -75,6 +75,20 @@ def _alias():
 		else:
 			print(alias + " =", " ".join(aliases[alias]))
 
+def _mcrcon(args: list):
+	if p"~/.mcrcon".exists():
+		source "~/.mcrcon"
+	else:
+		raise FileNotFoundError("~/.mcrcon")
+	$(mcrcon @(" ".join(args)))
+
+def _mcterm():
+	if p"~/.mcrcon".exists():
+		source "~/.mcrcon"
+	else:
+		raise FileNotFoundError("~/.mcrcon")
+	mcrcon -t
+
 # aliases
 aliases.update({
 	'bwg': _bwc,
@@ -83,6 +97,8 @@ aliases.update({
 	'config': '/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME',
 	'debug': _debug,
 	'ls': 'ls -alhs --color=auto',
+	'mc': _mcrcon,
+	'mct': _mcterm,
 	':q': 'exit',
   'owo': 'echo uwu',
 	'ensure-tmux': _ensure_tmux,
