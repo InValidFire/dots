@@ -6,9 +6,12 @@
 [user]
 	useConfigOnly = true
 	email = invalidfire@fastmail.com
-	name = riley
+	name = Riley Housden
+	signingkey = 0D6208F6DF56B4D8
 [init]
 	defaultBranch = main
 [core]
 	editor = vim
 	autocrlf = input
+[commit]
+	gpgsign = true

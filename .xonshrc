@@ -14,7 +14,8 @@ def load_path():
 		'~/addins',
 		'~/.local/bin',
 		'~/bin',
-		'~/go/bin'
+		'~/go/bin',
+		'~/.deno/bin',
 	])
 	sys.path.insert(0, '')
 
@@ -89,6 +90,12 @@ def _mcterm():
 		raise FileNotFoundError("~/.mcrcon")
 	mcrcon -t
 
+def _add_system_user(args: list):
+	"""used to add a system user for systemd services"""
+	$(adduser --system --home @(args[1]))
+	$(addgroup --system @(args[0]))
+	$(adduser @(args[0]) @(args[0]))
+
 # aliases
 aliases.update({
 	'bwg': _bwc,
@@ -103,6 +110,7 @@ aliases.update({
   'owo': 'echo uwu',
 	'ensure-tmux': _ensure_tmux,
 	'alias': _alias,
+	'asu': _add_system_user
 })
 
 # man page colors :O
