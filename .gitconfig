@@ -13,5 +13,6 @@
 [core]
 	editor = vim
 	autocrlf = input
+	pager = less -x1,5
 [commit]
 	gpgsign = true

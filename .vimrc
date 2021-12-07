@@ -63,12 +63,8 @@ call plug#begin('~/.vim/plugged')
 
 Plug 'airblade/vim-gitgutter'
 Plug 'preservim/nerdtree'
-Plug 'ycm-core/YouCompleteMe', { 'do': './install.py' }
 Plug 'chiel92/vim-autoformat'
 Plug 'natebosch/vim-lsc'
 Plug 'https://tildegit.org/sloum/gemini-vim-syntax'
-Plug 'dracula/vim', { 'as': 'dracula'}
 
 call plug#end()
-
-colorscheme dracula

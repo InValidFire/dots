@@ -4,7 +4,20 @@ if $HOSTNAME != "riley-laptop":
 else:
 	$PROMPT = '{RED} <3 {RESET}| {BOLD_GREEN}{cwd_base}{RESET} ) '
 $XONSH_COLOR_STYLE = 'default'
-xontrib load apt_tabcomplete argcomplete autovox jedi z
+xontrib load argcomplete autovox jedi z bashisms
+
+class CommandNotFoundException(Exception):
+		def __init__(self, command):
+			super().__init__(f"Command '{command}' not found.")
+
+def to_clipboard(text: str):
+	requires("xclip")
+	$(echo -n @(text) | xclip -sel clipboard)
+
+def requires(command: str):
+	if not !(which @(command)):
+		raise CommandNotFoundException(command) 
+	return True
 
 # path stuff
 
@@ -21,7 +34,8 @@ def load_path():
 
 load_path()
 
-import addins # my extra stuffs :p
+# TODO: Fix with Arch-based distros
+# import addins # my extra stuffs :p
 
 def _colortest():
 	import sys
@@ -31,10 +45,14 @@ def _colortest():
 			sys.stdout.write("\033[0m\n")
 
 # tmux
-if !(which tmux) and $TERM != 'tmux-256color':
-	folder = p'.'
-	tmux -2 new-session -A -s @(folder.resolve().name)
-	exit
+try:
+	requires("tmux")
+	if $TERM != 'tmux-256color':
+		folder = p'.'
+		tmux -2 new-session -A -s @(folder.resolve().name)
+		exit
+except CommandNotFoundException:
+	pass
 
 # debug
 def _debug():
@@ -46,20 +64,36 @@ def _debug():
 		print("Debug mode enabled.")
 
 # bitwarden shit
-def _bwc(object : str, bw_id: str):
-	if p'~/.bw_session'.exists():
-		if $XONSH_SHOW_TRACEBACK:
-			print("loaded .bw_session")
-		source ~/.bw_session
-	else:
+def bw_get(object: str, bw_id: str, nulled: bool = False):
+	if nulled:
+		return !(bw get @(object) @(bw_id) a> /dev/null)
+	return $(bw get @(object) @(bw_id))
+
+def _bwc(args: list):
+	requires("bw")
+	if not p'~/.bw_session'.exists():	
 		raise FileNotFoundError("~/.bw_session")
-	output = $(bw get @(object) @(bw_id))
-	$(echo @(output) | xclip -sel clipboard)
-	if "password" in object and !(bw get totp @(object[1]) a> /dev/null):
-		input("totp found, press any key to copy totp ")
-		output = $(bw get totp @(object[1]))
-		$(echo @(output) | xclip -sel clipboard)
-	#  return output
+	source ~/.bw_session
+
+	if args[0] == "full":  # determine which keys to search for.
+		items = ["username", "password", "totp"]
+	elif args[0] == "password":
+		items = ["password", "totp"]
+	else:
+		items = [args[0]]
+
+	for i in items: # removes keys that don't exist for the object.
+		if not bw_get(i, args[1], True):
+			items.remove(i)
+	
+	print(f"found: {', '.join(items)}")
+	for i in items:  # actually copy the info to clipboard.
+		output = bw_get(i, args[1])
+		to_clipboard(output)
+		if items.index(i) < len(items) - 1:
+			input(f"copied {i}, press enter to continue")
+		else:
+			print(f"copied {i}")
 
 def _ensure_tmux(args: list):
 	if $XONSH_SHOW_TRACEBACK:
