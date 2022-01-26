@@ -142,9 +142,15 @@ aliases.update({
 	'mct': _mcterm,
 	':q': 'exit',
   'owo': 'echo uwu',
+	'awa': 'echo ewe',
+	'ewe': 'echo iwi',
+	'iwi': 'echo awa',
+	'uwu': 'echo owo',
+	'ywy': 'echo whywhy',
 	'ensure-tmux': _ensure_tmux,
 	'alias': _alias,
-	'asu': _add_system_user
+	'asu': _add_system_user,
+	'l': '/home/riley/programs/light_controller/main.py'
 })
 
 # man page colors :O
