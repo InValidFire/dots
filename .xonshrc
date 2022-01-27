@@ -10,9 +10,23 @@ class CommandNotFoundException(Exception):
 		def __init__(self, command):
 			super().__init__(f"Command '{command}' not found.")
 
+# Windows Subsystem for Linux stuff
+
+def in_wsl() -> bool:
+	version = p'/proc/version'.read_text()
+	if "microsoft" in version:
+		return True
+	return False
+
+if in_wsl():
+	$GPG_TTY=$(tty)
+
 def to_clipboard(text: str):
-	requires("xclip")
-	$(echo -n @(text) | xclip -sel clipboard)
+	if in_wsl():
+		$(echo -n @(text) | clip.exe)
+	else:
+		requires("xclip")
+		$(echo -n @(text) | xclip -sel clipboard)
 
 def requires(command: str):
 	if not !(which @(command)):
