@@ -1,8 +1,10 @@
 # general shit
-if $HOSTNAME != "riley-laptop":
-	$PROMPT = '{RED} <> {RESET}| {BOLD_GREEN}{cwd_base}{RESET} ) '
-else:
+if $HOSTNAME == "riley-laptop":
 	$PROMPT = '{RED} <3 {RESET}| {BOLD_GREEN}{cwd_base}{RESET} ) '
+elif $HOSTNAME == "riley-server":
+	$PROMPT = '{RED} <> {RESET}| {BOLD_GREEN}{cwd_base}{RESET} ) '
+elif $HOSTNAME == "riley-desktop":
+	$PROMPT = '{RED} >< {RESET}| {BOLD_GREEN}{cwd_base}{RESET} ) '
 $XONSH_COLOR_STYLE = 'default'
 xontrib load argcomplete autovox jedi z bashisms
 
@@ -166,6 +168,11 @@ aliases.update({
 	'asu': _add_system_user,
 	'l': '/home/riley/programs/light_controller/main.py'
 })
+
+if in_wsl():
+	aliases.update({
+		'wh': "cd /mnt/c/Users/Riley"
+	})
 
 # man page colors :O
 $LESS_TERMCAP_mb = "\033[01;31m"     # begin blinking
