@@ -8,57 +8,22 @@ elif $HOSTNAME == "riley-desktop":
 $XONSH_COLOR_STYLE = 'default'
 xontrib load argcomplete autovox jedi z bashisms
 
-class CommandNotFoundException(Exception):
-		def __init__(self, command):
-			super().__init__(f"Command '{command}' not found.")
-
-# Windows Subsystem for Linux stuff
-
-def in_wsl() -> bool:
-	version = p'/proc/version'.read_text()
-	if "microsoft" in version:
-		return True
-	return False
-
-if in_wsl():
-	$GPG_TTY=$(tty)
-
-def to_clipboard(text: str):
-	if in_wsl():
-		$(echo -n @(text) | clip.exe)
-	else:
-		requires("xclip")
-		$(echo -n @(text) | xclip -sel clipboard)
-
-def requires(command: str):
-	if not !(which @(command)):
-		raise CommandNotFoundException(command) 
-	return True
-
-# path stuff
-
-def load_path():
-	import sys
-	$PATH.extend([
-		'~/addins',
-		'~/.local/bin',
-		'~/bin',
-		'~/go/bin',
-		'~/.deno/bin',
-	])
-	sys.path.insert(0, '')
-
-load_path()
+source "functions.xsh"
+source "exceptions.xsh"
+source "aliases.xsh"
 
 # TODO: Fix with Arch-based distros
 # import addins # my extra stuffs :p
 
-def _colortest():
-	import sys
-	for i in range(256):
-		sys.stdout.write(f"\033[48;5;{i}m   ")
-		if (i+1) % 16 == 0:
-			sys.stdout.write("\033[0m\n")
+# Windows Subsystem for Linux stuff
+if in_wsl():
+	$GPG_TTY=$(tty)  # allows gpg to work inside WSL
+
+# path stuff
+append_path("~/addins")
+append_path("~/.local/bin")
+append_path("~/bin")
+append_path("~/go/bin")
 
 # tmux
 try:
@@ -70,110 +35,6 @@ try:
 except CommandNotFoundException:
 	pass
 
-# debug
-def _debug():
-	if $XONSH_SHOW_TRACEBACK:
-		$XONSH_SHOW_TRACEBACK = False
-		print("Debug mode disabled.")
-	else:
-		$XONSH_SHOW_TRACEBACK = True
-		print("Debug mode enabled.")
-
-# bitwarden shit
-def bw_get(object: str, bw_id: str, nulled: bool = False):
-	if nulled:
-		return !(bw get @(object) @(bw_id) a> /dev/null)
-	return $(bw get @(object) @(bw_id))
-
-def _bwc(args: list):
-	requires("bw")
-	if not p'~/.bw_session'.exists():	
-		raise FileNotFoundError("~/.bw_session")
-	source ~/.bw_session
-
-	if args[0] == "full":  # determine which keys to search for.
-		items = ["username", "password", "totp"]
-	elif args[0] == "password":
-		items = ["password", "totp"]
-	else:
-		items = [args[0]]
-
-	for i in items: # removes keys that don't exist for the object.
-		if not bw_get(i, args[1], True):
-			items.remove(i)
-	
-	print(f"found: {', '.join(items)}")
-	for i in items:  # actually copy the info to clipboard.
-		output = bw_get(i, args[1])
-		to_clipboard(output)
-		if items.index(i) < len(items) - 1:
-			input(f"copied {i}, press enter to continue")
-		else:
-			print(f"copied {i}")
-
-def _ensure_tmux(args: list):
-	if $XONSH_SHOW_TRACEBACK:
-		print(args)
-	if not $(tmux has-session -t @(args[0])):
-		tmux new-session -d -s @(args[0]) all> /dev/null
-		$(tmux send-keys -t @(args[0]) @(f"cd {args[1]}") C-m)
-		$(tmux send-keys -t @(args[0]) @(f"{args[2]}") C-m)
-
-def _alias():
-	for alias in aliases:
-		if callable(aliases[alias]):
-			print(alias + " = ", aliases[alias].__name__)
-		else:
-			print(alias + " =", " ".join(aliases[alias]))
-
-def _mcrcon(args: list):
-	if p"~/.mcrcon".exists():
-		source "~/.mcrcon"
-	else:
-		raise FileNotFoundError("~/.mcrcon")
-	$(mcrcon @(" ".join(args)))
-
-def _mcterm():
-	if p"~/.mcrcon".exists():
-		source "~/.mcrcon"
-	else:
-		raise FileNotFoundError("~/.mcrcon")
-	mcrcon -t
-
-def _add_system_user(args: list):
-	"""used to add a system user for systemd services"""
-	$(adduser --system --home @(args[1]))
-	$(addgroup --system @(args[0]))
-	$(adduser @(args[0]) @(args[0]))
-
-# aliases
-aliases.update({
-	'bwg': _bwc,
-	'bwc': _bwc,
-	'colortest': _colortest,
-	'config': '/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME',
-	'debug': _debug,
-	'ls': 'ls -alhs --color=auto',
-	'mc': _mcrcon,
-	'mct': _mcterm,
-	':q': 'exit',
-  'owo': 'echo uwu',
-	'awa': 'echo ewe',
-	'ewe': 'echo iwi',
-	'iwi': 'echo awa',
-	'uwu': 'echo owo',
-	'ywy': 'echo whywhy',
-	'ensure-tmux': _ensure_tmux,
-	'alias': _alias,
-	'asu': _add_system_user,
-	'l': '/home/riley/programs/light_controller/main.py'
-})
-
-if in_wsl():
-	aliases.update({
-		'wh': "cd /mnt/c/Users/Riley"
-	})
-
 # man page colors :O
 $LESS_TERMCAP_mb = "\033[01;31m"     # begin blinking
 $LESS_TERMCAP_md = "\033[01;31m"     # begin bold
@@ -181,3 +42,4 @@ $LESS_TERMCAP_me = "\033[0m"         # end mode
 $LESS_TERMCAP_so = "\033[01;44;36m"  # begin standout-mode (bottom of screen)
 $LESS_TERMCAP_se = "\033[0m"         # end standout-mode
 
+load_aliases()
