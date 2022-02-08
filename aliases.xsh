@@ -81,7 +81,6 @@ def load_aliases():
 	aliases.update({
 		'bwg': _bwc,
 		'colortest': _colortest,
-		'config': '/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME',
 		'debug': _debug,
 		'ls': 'ls -alhs --color=auto',
 		'mc': _mcrcon,
@@ -100,5 +99,11 @@ def load_aliases():
 	# Windows specific aliases
 	if in_win():
 		aliases.update({
+			'config': 'git.exe --git-dir=$USERPROFILE/.cfg/ --work-tree=$USERPROFILE',
 			'ls': $('dir')  # get past namespace conflict with python's dir() function.
+		})
+
+	if not in_win():
+		aliases.update({
+			'config': '/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME',
 		})
