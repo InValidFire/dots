@@ -25,6 +25,9 @@ append_path("~/.local/bin")
 append_path("~/bin")
 append_path("~/go/bin")
 
+if in_win():
+	append_path("F:/programs/installed/micro")
+
 # tmux
 try:
 	requires("tmux")

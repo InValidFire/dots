@@ -12,7 +12,8 @@ def in_wsl() -> bool:
 def in_win() -> bool:
 	"""Determines if the system is running inside a Windows environment."""
 
-	if ${'OS'} == "Windows_NT":
+	import os
+	if 'OS' in os.environ and os.environ['OS'] == "Windows_NT":
 		return True
 	return False
 
