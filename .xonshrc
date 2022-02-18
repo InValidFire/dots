@@ -27,6 +27,7 @@ append_path("~/go/bin")
 
 if in_win():
 	append_path("F:/programs/installed/micro")
+	xontrib load ps1
 
 # tmux
 try:

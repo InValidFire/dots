@@ -77,6 +77,18 @@ def _colortest():
 		if (i+1) % 16 == 0:
 			sys.stdout.write("\033[0m\n")
 
+def _ls():
+     from colorama import Fore, Back, Style
+     line_list = []
+     command = $(cmd /c dir)
+     for line in command.split("\n"):
+         line = [x for x in line.split(" ") if x]
+         if "<DIR>" in line:
+             line[-1] = f"{Fore.GREEN}{line[-1]}{Style.RESET_ALL}"
+         line = " ".join(line)
+         line_list.append(line)
+     [[print(x) for x in line_list]]
+
 def load_aliases():
 	aliases.update({
 		'bwg': _bwc,
@@ -100,7 +112,9 @@ def load_aliases():
 	if in_win():
 		aliases.update({
 			'config': 'git.exe --git-dir=$USERPROFILE/.cfg/ --work-tree=$USERPROFILE',
-			'ls': $('dir')  # get past namespace conflict with python's dir() function.
+			'ls': ['cmd', '/c', 'dir'],  # get past namespace conflict with python's dir() function.
+			'lsn': _ls,
+			'lofi': ['powershell.exe', 'firefox.ps1', '-url', 'https://www.youtube.com/watch?v=5qap5aO4i9A/'],
 		})
 
 	if not in_win():
