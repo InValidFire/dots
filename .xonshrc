@@ -8,9 +8,9 @@ elif $HOSTNAME == "riley-desktop":
 $XONSH_COLOR_STYLE = 'default'
 xontrib load argcomplete autovox jedi z bashisms
 
-source "functions.xsh"
-source "exceptions.xsh"
-source "aliases.xsh"
+source "~/xsh/functions.xsh"
+source "~/xsh/exceptions.xsh"
+source "~/xsh/aliases.xsh"
 
 # TODO: Fix with Arch-based distros
 # import addins # my extra stuffs :p

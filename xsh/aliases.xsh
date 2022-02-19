@@ -1,4 +1,4 @@
-source "functions.xsh"
+source xsh/functions.xsh
 
 def _debug():
 	if $XONSH_SHOW_TRACEBACK:

@@ -1,4 +1,4 @@
-source "exceptions.xsh"
+source xsh/exceptions.xsh
 
 def in_wsl() -> bool:
 	"""Determines if the system is running inside a WSL environment."""
