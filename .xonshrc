@@ -6,14 +6,11 @@ elif $HOSTNAME == "riley-server":
 elif $HOSTNAME == "riley-desktop":
 	$PROMPT = '{RED} >< {RESET}| {BOLD_GREEN}{cwd_base}{RESET} ) '
 $XONSH_COLOR_STYLE = 'default'
-xontrib load argcomplete autovox jedi z bashisms
+xontrib load argcomplete autovox jedi z bashisms jds
 
 source "~/xsh/functions.xsh"
 source "~/xsh/exceptions.xsh"
 source "~/xsh/aliases.xsh"
-
-# TODO: Fix with Arch-based distros
-# import addins # my extra stuffs :p
 
 # Windows Subsystem for Linux stuff
 if in_wsl():

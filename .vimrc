@@ -12,7 +12,6 @@ if $TERM == 'tmux-256color'
 	let &t_8b = "\033[48;2;%lu;%lu;%lum"
 endif
 
-set termguicolors
 set background=dark
 syntax enable
 
@@ -66,5 +65,7 @@ Plug 'preservim/nerdtree'
 Plug 'chiel92/vim-autoformat'
 Plug 'natebosch/vim-lsc'
 Plug 'https://tildegit.org/sloum/gemini-vim-syntax'
+Plug 'meatballs/vim-xonsh'
+Plug 'davidhalter/jedi-vim'
 
 call plug#end()
