@@ -37,7 +37,7 @@ def jds_preproc(cmd: str, **kw):
 			cmd = f'print("\'{HOME}\' not found.")'
 		except ValueError:
 			cmd = f'print("\'{cmd.strip().replace("`", "")}\' is not a valid JDN.")'
-	elif cmd.startswith("`") and not cmd.strip().endswith("`"):
+	elif cmd.startswith("`") and not (len(cmd.strip()) >= 2 and cmd.strip().endswith("`")):
 		try:
 			johnny_decimal_notation = cmd.replace("`", "")
 			if johnny_decimal_notation == "\n":
