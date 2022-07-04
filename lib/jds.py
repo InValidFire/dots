@@ -1,7 +1,7 @@
 from pathlib import Path
 import re
 
-from .storage import StorageRoot, StorageFile, StorageFolder
+from .storage import StorageRoot, StorageFolder
 
 __all__ = ["JDS"]
 
@@ -23,19 +23,24 @@ class JDS(StorageRoot):
         temp.sort(key=lambda folder: folder.path)
         return temp
 
-    def get_bucket(self, bucket: StorageFolder | Path | str) -> list[StorageFolder]:
+    def get_bucket(self, bucket: StorageFolder | Path | str) -> StorageFolder:
+        """
+        Get the requested bucket.
+        If it cannot be found, return the JDS root instead.
+        """
         buckets = self.get_buckets()
         if isinstance(bucket, str):
+            bucket = str(int(bucket) - (int(bucket) % 10))
             for folder in buckets:
                 if bucket in folder.path.name:
-                    return folder.get_folders()
+                    return folder
         elif isinstance(bucket, Path):
             for folder in buckets:
                 if bucket == folder.path:
-                    return StorageFolder(bucket, self.root).get_folders()
+                    return folder
         elif isinstance(bucket, StorageFolder):
-            return bucket.get_folders()
-        raise FileNotFoundError(bucket)
+            return bucket
+        return self
 
     def get_categories(self) -> list[StorageFolder]:  # TODO: Improve this algorithm
         buckets = self.get_buckets()
@@ -48,19 +53,23 @@ class JDS(StorageRoot):
                 categories.append(folder)
         return categories
 
-    def get_category(self, category: StorageFolder | Path | str) -> list[StorageFolder]:
+    def get_category(self, category: StorageFolder | Path | str) -> StorageFolder:
+        """
+        Get the requested category.
+        If it cannot be found, try to return the bucket instead.
+        """
         categories = self.get_categories()
         if isinstance(category, str):
             for folder in categories:
                 if category in folder.path.name:
-                    return folder.get_folders()
+                    return folder
         elif isinstance(category, Path):
             for folder in categories:
                 if category == folder.path:
-                    return folder.get_folders()
+                    return folder
         elif isinstance(category, StorageFolder):
-            return category.get_folders()
-        raise FileNotFoundError(category)
+            return category
+        return self.get_bucket(category)
 
     def get_items(self) -> list[StorageFolder]:  # TODO: Improve this algorithm
         buckets = self.get_buckets()
@@ -73,10 +82,19 @@ class JDS(StorageRoot):
                 categories.append(folder)
         return categories
 
-    def get_item(self, jd_number: str) -> list[StorageFile]:
+    def get_item(self, jd_number: str) -> StorageFolder:
+        """
+        Gets the requested item by Johnny Decimal Number. 
+        If it cannot be found, try to return the category instead.
+        """
         category_id, item_id = jd_number.split(".")  # TODO: Improve this algorithm
+        try:
+            int(category_id)
+            int(item_id)
+        except ValueError as exc:
+            raise ValueError(f"'{jd_number}' is not a valid JDN") from exc
         category = self.get_category(category_id)
-        for item in category:
+        for item in category.get_folders():
             if item_id in item.path.name:
-                return item.get_files()
-        raise FileNotFoundError(jd_number)
+                return item
+        return self.get_category(category_id)

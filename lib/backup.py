@@ -23,7 +23,7 @@ class BackupManager:
     - delete_excess_backups()
     """
     def __init__(self, target: Path, date_format: str = "%d_%m_%y__%H%M%S", separator: str = "-",
-                 storage: StorageFolder = StorageRoot(Path.home().joinpath(".storage"))) -> None:
+                 storage: StorageFolder = StorageRoot(Path.home().joinpath(".storage")).get_folder("backups")) -> None:
         """
         Test
         """
@@ -101,18 +101,18 @@ class BackupManager:
             for item in self.target_path.glob("**/*"):
                 zip_file.write(item, item.relative_to(self.target_path))
 
-    def get_backups(self):
+    def get_backups(self) -> list[StorageFolder | StorageFile]:
         """
         Get all backups found in the given folder.
         """
-        return self.storage.get_files(f"{self.target_path.stem}{self.separator}*.zip")
+        return list(self.storage.glob(f"{self.target_path.stem}{self.separator}*.zip"))
 
-    def get_delete_candidates(self, max_backup_count) -> list[StorageFile]:
+    def get_delete_candidates(self, max_backup_count) -> list[StorageFile | StorageFolder]:
         """
         Get all candidates for deletion with the given max_backup_count.
         If none are available for deletion, returns None.
         """
-        def get_date(file: StorageFile) -> datetime:
+        def get_date(file: StorageFile | StorageFolder) -> datetime:
             """
             Turns the datetime string in the file name into a datetime object.
             """
@@ -121,6 +121,8 @@ class BackupManager:
 
         backups = self.get_backups()
         backups.sort(key=get_date)
+        if len(backups) < max_backup_count:
+            return []
         return backups[:(len(backups)-max_backup_count)]  # returns the oldest excess backups
 
     def delete_excess_backups(self, max_backup_count: int):
