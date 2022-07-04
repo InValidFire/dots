@@ -2,139 +2,111 @@
 Storage Module:
 
 Classes:
-- Storage
+- Storage (Legacy)
+- StorageRoot
+- StorageFolder
+- StorageFile
 """
 from __future__ import annotations
 
 import json
-import shutil
-
 from pathlib import Path
 
-__all__ = ['Storage']
+__all__ = ['StorageRoot', 'StorageFile', 'StorageFolder']
 
-class Storage:
-    """
-    Unifies all filesystem access methods under a single class.
-    Minimizes room for mistakes and improves reusability.
+class StorageFolder:
+    def __init__(self, path: Path, root: StorageRoot) -> None:
+        self.path = path
+        self.root = root
+        if not self.path.exists():
+            raise FileNotFoundError(self.path)
 
-    Methods:
-    - get_file()
-    - get_folder()
-    - write_file()
-    - read_file()
-    - delete_file()
-    - rename_file()
-    - add_file()
-    - list_files()
-    """
+    @property
+    def parent(self) -> StorageFolder | None:
+        if self.root.path not in self.path.parents and self.root.path.parent != self.path:
+            return None
+        return StorageFolder(self.path.parent, self.root)
 
-    def __init__(self, folder: str, root_folder: str = ".storage") -> None:
-        """
-        Create a new storage instance, it automatically creates and manages a folder in the user's home directory, all you have to do is supply a subfolder to store files in.
+    def get_folder(self, name: str) -> StorageFolder:
+        path = self.path.joinpath(name)
+        if path.exists():
+            return StorageFolder(path, self.root)
+        raise FileNotFoundError
 
-        Args:
-            folder (str): the name of the folder to use.
-        """
-        self.root = Path.home().joinpath(root_folder)
-        self.folder = self.root.joinpath(folder)
-        self.folder.mkdir(exist_ok=True, parents=True)
+    def get_folders(self) -> list[StorageFolder]:
+        folders = []
+        for folder in self.path.iterdir():
+            if not folder.is_dir():
+                continue
+            folders.append(StorageFolder(folder, self.root))
+        return folders
 
-    def get_file(self, path: str) -> Path:
-        """Get the fully qualified path of a file in the folder.
+    def get_files(self, pattern: str | None = None) -> list[StorageFile]:
+        files: list[StorageFile] = []
+        if pattern is None:
+            for file in self.path.iterdir():
+                if not file.is_file():
+                    continue
+                files.append(StorageFile(file, self))
+        else:
+            for file in self.path.glob(pattern):
+                if not file.is_file():
+                    continue
+                files.append(StorageFile(file, StorageFolder(file.parent, self.root)))
+        return files
 
-        Args:
-            path (str): the name of the file to grab.
+    def __str__(self) -> str:
+        return str(self.path)
 
-        Returns:
-            Path: the path of the file.
-        """
-        return self.folder.joinpath(path)
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}("{self.path}")'
 
-    def get_folder(self, name: str) -> Storage:
-        """
-        Get a folder inside the Storage directory.
-        Returns a Storage object representing that folder.
-        """
-        return Storage(name, root_folder=self.folder.name)
+class StorageFile:
+    def __init__(self, path: Path, parent: StorageFolder) -> None:
+        self.parent = parent
+        self.path = path
 
-    def write_file(self, name: str, data: dict):
-        """Write data to the given file in JSON format.
+    def delete(self):
+        self.path.unlink()
 
-        Args:
-            name (str): the name of the file.
-            data (dict): the data to write.
-        """
-        file = self.get_file(name)
-        file.touch(exist_ok=True)
-        with file.open("w+", encoding="utf-8") as f:
-            json.dump(data, f, indent=4)
+    def rename(self, new_name: str | Path):
+        self.path.rename(new_name)
 
-    def read_file(self, name: str) -> dict:
-        """Read data from the given file in JSON format.
-
-        Args:
-            name (str): the name of the file.
-
-        Returns:
-            dict: the data from the file.
-        """
-        file = self.get_file(name)
-        if not file.exists():
+    def read(self) -> dict:
+        if not self.path.exists():
             return {}
-        with file.open("r+", encoding="utf-8") as f:
+        with self.path.open("r+", encoding="utf-8") as f:
             data = json.load(f)
         return data
 
-    def delete_file(self, name: str):
-        """Delete the given file from the folder.
+    def write(self, data: dict | bytes) -> None:
+        self.path.touch(exist_ok=True)
+        if isinstance(data, dict):
+            with self.path.open("w+", encoding="utf-8") as f:
+                json.dump(data, f, indent=4)
+        elif isinstance(data, bytes):
+            self.path.write_bytes(data)
 
-        Args:
-            name (str): the name of the file.
-        """
-        file = self.get_file(name)
-        file.unlink(missing_ok=True)
+    def __str__(self) -> str:
+        return str(self.path)
 
-    def rename_file(self, old_name: str, new_name: str):
-        """Rename a file in the folder.
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}("{self.path}")'
 
-        Args:
-            old_name (str): the current name of the file.
-            new_name (str): the new name of the file.
-        """
-        file = self.get_file(old_name)
-        new_file = self.folder.joinpath(new_name)
-        file.rename(new_file)
+class StorageRoot(StorageFolder):
+    def __init__(self, path: Path = Path.home().joinpath(".storage")) -> None:
+        super().__init__(path, self)
 
-    def add_file(self, name: str,  path: Path | None = None, binary: bytes | None = None):
-        """Add a copy of a file to the folder.
-        If a binary stream is given, it is saved directly to the named location.
+    @property
+    def path(self):
+        """The root folder, all Folder objects should be a child of this."""
+        return self._path
 
-        Args:
-            name (str): The name to save it under.
-            path (Path): The path of the file to copy from.
-            binary (BinaryIO): The binary stream to copy from.
-        """
-        if path is not None and binary is not None:
-            raise ValueError(binary, "Cannot supply both a path and a binary stream.")
-        elif path is not None:
-            shutil.copy(path, self.folder.joinpath(name))
-        elif binary is not None:
-            with self.folder.joinpath(name).open("wb+") as f:
-                f.write(binary)
-
-    def list_files(self, pattern: str | None = None) -> list[Path]:
-        """
-        Return a list of all files in the directory.
-
-        Args:
-            pattern (str): An optional glob pattern to filter the file list.
-        """
-        files: list[Path] = []
-        if pattern is None:
-            for file in self.folder.iterdir():
-                files.append(file)
+    @path.setter
+    def path(self, new_path: str | Path):
+        if isinstance(new_path, str):
+            self._path = Path.home().joinpath(new_path)
+        elif isinstance(new_path, Path):
+            self._path = new_path
         else:
-            for file in self.folder.glob(pattern):
-                files.append(file)
-        return files
+            raise TypeError(new_path)

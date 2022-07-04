@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from zipfile import ZipFile
 
-from . import Storage
+from . import StorageRoot, StorageFolder, StorageFile
 
 __all__ = ["BackupManager"]
 
@@ -22,13 +22,13 @@ class BackupManager:
     - get_delete_candidates()
     - delete_excess_backups()
     """
-    def __init__(self, target_path: Path, backup_storage: Storage = Storage("backups"),
-                 date_format: str = "%d_%m_%y__%H%M%S", separator: str = "-") -> None:
+    def __init__(self, target: Path, date_format: str = "%d_%m_%y__%H%M%S", separator: str = "-",
+                 storage: StorageFolder = StorageRoot(Path.home().joinpath(".storage"))) -> None:
         """
         Test
         """
-        self.target_path = target_path
-        self.backup_storage = backup_storage
+        self.target_path = target
+        self.storage = storage
         self.date_format = date_format
         self.separator = separator
 
@@ -50,16 +50,16 @@ class BackupManager:
             raise TypeError(new_path)
 
     @property
-    def backup_storage(self) -> Storage:
+    def storage(self) -> StorageFolder:
         """
         Storage object to store created backups in.
         """
-        return self._backup_storage
+        return self._storage
 
-    @backup_storage.setter
-    def backup_storage(self, new_storage: Storage):
-        if isinstance(new_storage, Storage):
-            self._backup_storage = new_storage
+    @storage.setter
+    def storage(self, new_storage: StorageFolder):
+        if isinstance(new_storage, StorageFolder):
+            self._storage = new_storage
         else:
             raise TypeError(new_storage)
 
@@ -96,7 +96,7 @@ class BackupManager:
         """
         date_string = datetime.now().strftime(self.date_format)
         backup_name = f"{self.target_path.name}{self.separator}{date_string}.zip"
-        backup_path = self.backup_storage.get_file(backup_name)
+        backup_path = self.storage.path.joinpath(backup_name)
         with ZipFile(backup_path, mode="w") as zip_file:
             for item in self.target_path.glob("**/*"):
                 zip_file.write(item, item.relative_to(self.target_path))
@@ -105,18 +105,18 @@ class BackupManager:
         """
         Get all backups found in the given folder.
         """
-        return self.backup_storage.list_files(f"{self.target_path.stem}{self.separator}*.zip")
+        return self.storage.get_files(f"{self.target_path.stem}{self.separator}*.zip")
 
-    def get_delete_candidates(self, max_backup_count) -> list[Path]:
+    def get_delete_candidates(self, max_backup_count) -> list[StorageFile]:
         """
         Get all candidates for deletion with the given max_backup_count.
         If none are available for deletion, returns None.
         """
-        def get_date(file: Path) -> datetime:
+        def get_date(file: StorageFile) -> datetime:
             """
             Turns the datetime string in the file name into a datetime object.
             """
-            date_string = file.name.split(self.separator)[1].replace(file.suffix, "")
+            date_string = file.path.name.split(self.separator)[1].replace(file.path.suffix, "")
             return datetime.strptime(date_string, self.date_format)
 
         backups = self.get_backups()
@@ -126,4 +126,4 @@ class BackupManager:
     def delete_excess_backups(self, max_backup_count: int):
         """Delete all excess backups"""
         for file in self.get_delete_candidates(max_backup_count):
-            file.unlink()
+            file.delete()
