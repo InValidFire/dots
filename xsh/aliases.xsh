@@ -1,3 +1,4 @@
+import lib
 source ~/xsh/functions.xsh
 
 def _debug():
@@ -41,19 +42,60 @@ def _bwc(args: list):
 		else:
 			print(f"copied {i}")
 
-def _mcrcon(args: list):
-	if p"~/.mcrcon".exists():
-		source "~/.mcrcon"
-	else:
-		raise FileNotFoundError("~/.mcrcon")
-	$(mcrcon @(" ".join(args)))
+def _backup(args: list):
+	from pathlib import Path
+	target_path = Path(args[0])
+	max_backup_count: int = 3
+	if len(args) == 2 and isinstance(args[1], int):
+		max_backup_count = int(args[1])
+	bm = lib.BackupManager(target_path)
+	bm.create_backup()
+	bm.delete_excess_backups(max_backup_count)
 
-def _mcterm():
-	if p"~/.mcrcon".exists():
-		source "~/.mcrcon"
-	else:
-		raise FileNotFoundError("~/.mcrcon")
-	mcrcon -t
+def _mcrcon(args: list):
+	import json
+	try:
+		with p"~/.mcrcon.json".open("r") as fp:
+			servers_data = json.load(fp)
+		server_data = servers_data[args[0]]
+		$MCRCON_HOST = server_data["address"]
+		$MCRCON_PORT = server_data["port"]
+		$MCRCON_PASS = server_data["password"]
+		$(mcrcon @(" ".join(args[1:])))
+	except IndexError:
+		print("Please indicate which server to connect to.")
+	except KeyError:
+		print("Server configuration not found.")
+	except FileNotFoundError:
+		print("Server configuration file '.mcrcon.json' is not found.")
+
+def _mcterm(args: list):
+	import json
+	try:
+		with p"~/.mcrcon.json".open("r") as fp:
+			servers_data = json.load(fp)
+		server_data = servers_data[args[0]]
+		$MCRCON_HOST = server_data["address"]
+		$MCRCON_PORT = server_data["port"]
+		$MCRCON_PASS = server_data["password"]
+		mcrcon -t
+	except IndexError:
+		print("Please indicate which server to connect to.")
+	except KeyError:
+		print("Server configuration not found.")
+	except FileNotFoundError:
+		print("Server configuration file '.mcrcon.json' is not found.")
+
+def _mclist():
+	import json
+	try:
+		with p"~/.mcrcon.json".open("r") as fp:
+			servers_data = json.load(fp)
+			print("Servers:")
+			for key in servers_data:
+				print("\t-", key)
+	except FileNotFoundError:
+		print("Server configuration file '.mcrcon.json' is not found.")
 
 def _alias():
 	for alias in aliases:
@@ -91,12 +133,15 @@ def _ls():
 
 def load_aliases():
 	aliases.update({
+		'bu': _backup,
+		'backup': _backup,
 		'bwg': _bwc,
 		'colortest': _colortest,
 		'debug': _debug,
 		'ls': 'ls -alhs --color=auto',
 		'mc': _mcrcon,
 		'mct': _mcterm,
+		'mcl': _mclist,
 		':q': 'exit',
 		'ensure-tmux': _ensure_tmux,
 		'aliases': _alias,
