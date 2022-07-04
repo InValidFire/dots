@@ -1,4 +1,3 @@
-import lib
 source ~/xsh/functions.xsh
 
 def _debug():

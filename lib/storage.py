@@ -126,6 +126,9 @@ class Storage:
     def list_files(self, pattern: str | None = None) -> list[Path]:
         """
         Return a list of all files in the directory.
+
+        Args:
+            pattern (str): An optional glob pattern to filter the file list.
         """
         files: list[Path] = []
         if pattern is None:

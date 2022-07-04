@@ -1,3 +1,9 @@
+# lib
+try:
+	import lib
+except:
+	print("failed to import custom library modules")
+
 # general shit
 if $HOSTNAME == "riley-laptop":
 	$PROMPT = '{RED} <3 {RESET}| {BOLD_GREEN}{cwd_base}{RESET} ) '
