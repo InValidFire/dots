@@ -1,4 +1,18 @@
 source ~/xsh/exceptions.xsh
+import lib
+
+def allow_interrupt(f):
+	from functools import wraps
+	@wraps
+	def wrapper(*args, **kwargs):
+		try:
+			return f(args, kwargs)
+		except KeyboardInterrupt:
+			print("\nAborting!")
+
+def print_divider(symbol: str = "-"):
+	import os
+	print(f"-" * os.get_terminal_size().columns)
 
 def in_wsl() -> bool:
 	"""Determines if the system is running inside a WSL environment."""

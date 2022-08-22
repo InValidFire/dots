@@ -1,4 +1,7 @@
 source ~/xsh/functions.xsh
+source ~/xsh/bw.xsh
+source ~/xsh/backup.xsh
+source ~/xsh/roku.xsh
 
 def _debug():
 	if $XONSH_SHOW_TRACEBACK:
@@ -8,54 +11,10 @@ def _debug():
 		$XONSH_SHOW_TRACEBACK = True
 		print("Debug mode enabled.")
 
-def bw_get(object: str, bw_id: str, nulled: bool = False):
-	if nulled and in_win():
-		return !(bw get @(object) @(bw_id) a> nul)
-	elif nulled and not in_win():
-		return !(bw get @(object) @(bw_id) a> /dev/null)
-	return $(bw get @(object) @(bw_id))
-
-def _bwc(args: list):
-	requires("bw")
-	if not p'~/.bw_session'.exists():	
-		raise FileNotFoundError("~/.bw_session")
-	source ~/.bw_session
-
-	if args[0] == "full":  # determine which keys to search for.
-		items = ["username", "password", "totp"]
-	elif args[0] == "password":
-		items = ["password", "totp"]
-	else:
-		items = [args[0]]
-
-	for i in items: # removes keys that don't exist for the object.
-		if not bw_get(i, args[1], True):
-			items.remove(i)
-	
-	print(f"found: {', '.join(items)}")
-	for i in items:  # actually copy the info to clipboard.
-		output = bw_get(i, args[1])
-		to_clipboard(output)
-		if items.index(i) < len(items) - 1:
-			input(f"copied {i}, press enter to continue")
-		else:
-			print(f"copied {i}")
-
-def _backup(args: list):
-	from pathlib import Path
-	target_path = Path(args[0])
-	max_backup_count: int = 3
-	if len(args) == 2 and isinstance(args[1], int):
-		max_backup_count = int(args[1])
-	bm = lib.BackupManager(target_path)
-	bm.create_backup()
-	bm.delete_excess_backups(max_backup_count)
-
 def _mcrcon(args: list):
-	import json
 	try:
-		with p"~/.mcrcon.json".open("r") as fp:
-			servers_data = json.load(fp)
+		storage = lib.StorageRoot()
+		servers_data = storage.get_file(".mcrcon.json").read()
 		server_data = servers_data[args[0]]
 		$MCRCON_HOST = server_data["address"]
 		$MCRCON_PORT = server_data["port"]
@@ -69,10 +28,9 @@ def _mcrcon(args: list):
 		print("Server configuration file '.mcrcon.json' is not found.")
 
 def _mcterm(args: list):
-	import json
 	try:
-		with p"~/.mcrcon.json".open("r") as fp:
-			servers_data = json.load(fp)
+		storage = lib.StorageRoot()
+		servers_data = storage.get_file(".mcrcon.json").read()
 		server_data = servers_data[args[0]]
 		$MCRCON_HOST = server_data["address"]
 		$MCRCON_PORT = server_data["port"]
@@ -86,22 +44,14 @@ def _mcterm(args: list):
 		print("Server configuration file '.mcrcon.json' is not found.")
 
 def _mclist():
-	import json
 	try:
-		with p"~/.mcrcon.json".open("r") as fp:
-			servers_data = json.load(fp)
-			print("Servers:")
-			for key in servers_data:
-				print("\t-", key)
+		storage = lib.StorageRoot()
+		server_data = storage.get_file(".mcrcon.json").read()
+		print("Servers:")
+		for key in servers_data:
+			print("\t-", key)
 	except FileNotFoundError:
 		print("Server configuration file '.mcrcon.json' is not found.")
-
-def _alias():
-	for alias in aliases:
-		if callable(aliases[alias]):
-			print(alias + " = ", aliases[alias].__name__)
-		else:
-			print(alias + " =", " ".join(aliases[alias]))
 
 def _ensure_tmux(args: list):
 	if $XONSH_SHOW_TRACEBACK:
@@ -130,10 +80,26 @@ def _ls():
          line_list.append(line)
      [[print(x) for x in line_list]]
 
+def _bwc(args: list):
+	try:
+		bw_main(args)
+	except KeyboardInterrupt:
+		print("\nAborting!")
+		return
+
+def _ytv(args: list):
+	roku_main(args)
+
+def _backup(args: list):
+	backup_main(args)
+
+def _restore(args: list):
+	restore_main(args)
+
 def load_aliases():
 	aliases.update({
-		'bu': _backup,
 		'backup': _backup,
+		'restore': _restore,
 		'bwg': _bwc,
 		'colortest': _colortest,
 		'debug': _debug,
@@ -143,7 +109,7 @@ def load_aliases():
 		'mcl': _mclist,
 		':q': 'exit',
 		'ensure-tmux': _ensure_tmux,
-		'aliases': _alias,
+		'ytv': _ytv
 	})
 
 	# WSL specific aliases

@@ -13,7 +13,7 @@ def jds_preproc(cmd: str, **kw):
 		try:
 			johnny_decimal_notation = cmd.replace("`", "").strip()
 			path = JDS(HOME).get_item(johnny_decimal_notation).path
-			cmd = f"cd '{path.resolve()}'"
+			cmd = f'cd "{path.resolve()}"'
 		except FileNotFoundError:
 			cmd = f'print("\'{HOME}\' not found.")'
 		except ValueError:
@@ -26,7 +26,7 @@ def jds_preproc(cmd: str, **kw):
 			category = JDS(HOME).get_category(johnny_decimal_notation).path
 			cmd = f"cd '{category.resolve()}'"
 		except FileNotFoundError as exc:
-			cmd = f'print(exc)'
+			cmd = f'print("errored:", exc)'
 		except ValueError:
 			cmd = f'print("\'{cmd.strip().replace("`", "")}\' is not a valid JDN.")'
-	return cmd
+	return cmd.strip()

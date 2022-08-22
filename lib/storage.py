@@ -11,20 +11,31 @@ from abc import ABC, abstractmethod
 from collections.abc import Generator
 
 import json
+import warnings
 from pathlib import Path
 import shutil
+from zipfile import ZipFile
 
 __all__ = ['StorageRoot', 'StorageFile', 'StorageFolder']
 
+class StorageException(Exception):
+    """Base exception for Storage module"""
+
+class ChildPathError(StorageException):
+    """Path is not a child of the StorageRoot"""
+
 class StorageBase(ABC):
+    """Base class for all Storage classes, should not be used directly."""
     def __init__(self, path: Path, root: StorageRoot):
         self.path = path
         self.root = root
+        if self.root.path not in self.path.parents and self.root.path != self.path:
+            raise ChildPathError(f"{self.path} is not a child of {self.root}")
 
     @property
     def parent(self) -> StorageFolder | None:
         """The parent of the Storage object. StorageRoot will have no parent."""
-        if self.root.path not in self.path.parents and self.root.path.parent != self.path:
+        if self.root.path not in self.path.parents:
             return None
         return StorageFolder(self.path.parent, self.root)
 
@@ -64,8 +75,17 @@ class StorageFolder(StorageBase):
     """A folder located within the Storage system."""
     def __init__(self, path: Path, root: StorageRoot) -> None:
         super().__init__(path, root)
-        if not self.path.exists():
+        if not self.path.resolve().exists():
             raise FileNotFoundError(self.path)
+
+    def get_file(self, name: str) -> StorageFile:
+        """Get a file located within the StorageFolder"""
+        path = self.path.joinpath(name)
+        if path.exists() and path.is_file():
+            return StorageFile(path, self.root)
+        if path.exists() and not path.is_file():
+            raise ValueError(f"{path} is a directory.")
+        raise FileNotFoundError(self.path.joinpath(name))
 
     def get_folder(self, name: str) -> StorageFolder:
         """Get a folder located within the StorageFolder."""
@@ -140,11 +160,32 @@ class StorageFile(StorageBase):
 
     def read(self) -> dict:
         """Read the file's JSON format to a dictionary structure."""
+        warnings.warn("this method is deprecated... use read_json instead.", DeprecationWarning)
         if not self.path.exists():
             return {}
-        with self.path.open("r+", encoding="utf-8") as f:
-            data = json.load(f)
-        return data
+        if self.path.suffix == ".json":
+            with self.path.open("r+", encoding="utf-8") as f:
+                data = json.load(f)
+                return data
+        else:
+            raise ValueError("File is not in JSON format.")
+    
+    def read_json(self) -> dict:
+        """If the file is a json file, read its data to a dictionary structure and return it."""
+        if not self.path.exists():
+            return {}
+        if self.path.suffix == ".json":
+            with self.path.open("r+", encoding="utf-8") as f:
+                data = json.load(f)
+                return data
+        else:
+            raise ValueError("File is not in JSON format.")
+
+    def read_zip(self):
+        return ZipFile(self.path)
+
+    def read_text(self):
+        return self.path.read_text()
 
     def write(self, data: dict | bytes) -> None:
         """Write a dictionary or bytes object to the file."""

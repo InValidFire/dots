@@ -1,5 +1,6 @@
 # lib
 try:
+	$PYTHONPATH = "/home/riley/lib"
 	import lib
 except:
 	print("failed to import custom library modules")
@@ -12,7 +13,6 @@ elif $HOSTNAME == "riley-server":
 elif $HOSTNAME == "riley-desktop":
 	$PROMPT = '{RED} >< {RESET}| {BOLD_GREEN}{cwd_base}{RESET} ) '
 $XONSH_COLOR_STYLE = 'default'
-xontrib load argcomplete autovox jedi z bashisms jds
 
 source "~/xsh/functions.xsh"
 source "~/xsh/exceptions.xsh"
@@ -31,16 +31,6 @@ append_path("~/go/bin")
 if in_win():
 	append_path("F:/programs/installed/micro")
 	xontrib load ps1
-
-# tmux
-try:
-	requires("tmux")
-	if $TERM != 'tmux-256color':
-		folder = p'.'
-		tmux -2 new-session -A -s @(folder.resolve().name)
-		exit
-except CommandNotFoundException:
-	pass
 
 # man page colors :O
 $LESS_TERMCAP_mb = "\033[01;31m"     # begin blinking

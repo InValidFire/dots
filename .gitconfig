@@ -3,6 +3,7 @@
 	br = branch
 	c = commit
 	um = commit --amend
+	shit = reset
 [user]
 	useConfigOnly = true
 	email = invalidfire@fastmail.com
