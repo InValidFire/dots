@@ -1,5 +1,4 @@
 source ~/xsh/exceptions.xsh
-import lib
 
 def allow_interrupt(f):
 	from functools import wraps
