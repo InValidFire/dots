@@ -25,9 +25,9 @@ def handle_duplicates(duplicate_message: str, args: list):
         return duplicate_ids[choice]
 
 def load_bw_session():
-    storage = lib.StorageRoot()
-    session_file = storage.get_file("bw_session")
-    $(source @(session_file.path))
+    from pathlib import Path
+    session_file = Path.home().joinpath("storage/config/bw_session")
+    $(source @(session_file))
 
 def handle_items(args: list) -> list:
     """Checks if the possible items exist for the requested ID. If they do not, they get removed."""
