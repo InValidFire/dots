@@ -31,7 +31,8 @@ append_path("~/bin")
 append_path("~/go/bin")
 
 # medication prompt
-!(meds-prompt)
+if $HOSTNAME == "riley-laptop":
+	!(meds-prompt)
 
 # man page colors :O
 $LESS_TERMCAP_mb = "\033[01;31m"     # begin blinking
