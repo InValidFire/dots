@@ -2,6 +2,7 @@ source ~/xsh/functions.xsh
 source ~/xsh/bw.xsh
 source ~/xsh/backup.xsh
 source ~/xsh/roku.xsh
+source ~/xsh/keys.xsh
 
 def _debug():
 	if $XONSH_SHOW_TRACEBACK:
@@ -93,6 +94,9 @@ def _ytv(args: list):
 def _backup(args: list):
 	backup_main(args)
 
+def _config(args: list):
+	config_main(args)
+
 def _restore(args: list):
 	restore_main(args)
 
@@ -100,6 +104,7 @@ def load_aliases():
 	aliases.update({
 		'backup': _backup,
 		'restore': _restore,
+		'key': _config,
 		'bwg': _bwc,
 		'colortest': _colortest,
 		'debug': _debug,
