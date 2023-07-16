@@ -13,6 +13,7 @@ def _color_prompt(text: str, bold: bool = False):
     }
     color_path = Path.home().joinpath("storage/config/prompt_color")
     if not color_path.exists():
+        color_path.parent.mkdir(parents=True)
         color_path.touch()
         color = 1
     else:
