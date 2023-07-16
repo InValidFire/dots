@@ -1,3 +1,5 @@
+source "~/xsh/keys.xsh"
+
 def _color_prompt(text: str, bold: bool = False):
     import random
     from colorama import Style, Fore
@@ -11,19 +13,16 @@ def _color_prompt(text: str, bold: bool = False):
         7: Fore.CYAN,
         8: Fore.WHITE
     }
-    color_path = Path.home().joinpath("storage/config/prompt_color")
-    if not color_path.exists():
-        color_path.parent.mkdir(parents=True)
-        color_path.touch()
-        color = 1
-    else:
-        color = int(color_path.read_text())
-    if color > 8:
-        color = 1
-    color_path.write_text(str(random.randint(2, 8)))
+    try:
+        color = get_key("prompt_color")
+        if color > 8:
+            color = 2
+    except ValueError:
+        color = 2
     output = ""
     if bold:
         output = Style.BRIGHT
     output += colors[color] + text + Fore.RESET
+    set_key("prompt_color", color+1)
     return output
 
