@@ -1,4 +1,5 @@
 source ~/xsh/functions.xsh
+source ~/xsh/keys.xsh
 
 def bw_get(object: str, bw_id: str, captured: bool = False):
 	if captured and in_win():
@@ -25,10 +26,8 @@ def handle_duplicates(duplicate_message: str, args: list):
         return duplicate_ids[choice]
 
 def load_bw_session():
-    from pathlib import Path
-    session_file = Path.home().joinpath("storage/config/bw_session")
-    $(source @(session_file))
-
+    return get_key("bw_session")
+        
 def handle_items(args: list) -> list:
     """Checks if the possible items exist for the requested ID. If they do not, they get removed."""
     if args[0] in ["full", "f"]:
@@ -57,10 +56,11 @@ def get_output_from_items(items: list, args: list):
 def bw_main(args: list):
     requires("bw")
     print("Loading...")
-    load_bw_session()
+    $BW_SESSION = load_bw_session()
     items = handle_items(args)
     print("Getting items...")
     output = get_output_from_items(items, args)
+    print(output)
     print(f"found: {', '.join(items)}")
     for key in output:  # copy dict values to clipboard
         to_clipboard(output[key])
