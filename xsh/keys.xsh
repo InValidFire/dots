@@ -27,7 +27,7 @@ def set_key(key: str, value: str):
         data = json.load(fp)
     data[key] = value
     with path.open(mode="w", encoding="utf-8") as fp:
-        json.dump(data, fp)
+        json.dump(data, fp, indent=4)
     return data[key]
 
 def delete_key(key: str):
@@ -39,7 +39,7 @@ def delete_key(key: str):
         data = json.load(fp)
     data.pop(key)
     with path.open(mode="w", encoding="utf-8") as fp:
-        json.dump(data, fp)
+        json.dump(data, fp, indent=4)
     return data
 
 def config_main(args: list):
