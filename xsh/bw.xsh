@@ -60,7 +60,6 @@ def bw_main(args: list):
     items = handle_items(args)
     print("Getting items...")
     output = get_output_from_items(items, args)
-    print(output)
     print(f"found: {', '.join(items)}")
     for key in output:  # copy dict values to clipboard
         to_clipboard(output[key])

@@ -26,3 +26,6 @@ def _color_prompt(text: str, bold: bool = False):
     set_key("prompt_color", color+1)
     return output
 
+def _reset_colors():
+    from colorama import Style, Fore
+    return Style.RESET_ALL

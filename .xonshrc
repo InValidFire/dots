@@ -13,7 +13,7 @@ else:
 
 identifier = _color_prompt(identifier)
 cwd_base = _color_prompt("{cwd_base}", bold=True)
-prompt =  '{env_name: {}}' + identifier + ' ' + cwd_base + ' ) '
+prompt =  '{env_name: {}}' + identifier + ' ' + cwd_base + ' ) ' + _reset_colors()
 $PROMPT = prompt
 $XONSH_COLOR_STYLE = 'default'
 
