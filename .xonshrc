@@ -6,6 +6,8 @@ if $HOSTNAME == "riley-laptop":
 	identifier = "<3"
 elif $HOSTNAME == "riley-server":
 	identifier = "<>"
+elif $HOSTNAME == "tilde.town":
+  identifier = ">3"
 elif $HOSTNAME == "riley-desktop":
 	identifier = "><"
 else:
