@@ -5,13 +5,13 @@ def _color_prompt(text: str, bold: bool = False):
     from colorama import Style, Fore
     from pathlib import Path
     colors = {
-        2: Fore.RED,
-        3: Fore.GREEN,
-        4: Fore.YELLOW,
-        5: Fore.BLUE,
-        6: Fore.MAGENTA,
-        7: Fore.CYAN,
-        8: Fore.WHITE
+        2: "RED",
+        3: "GREEN",
+        4: "YELLOW",
+        5: "BLUE",
+        6: "PURPLE",
+        7: "CYAN",
+        8: "WHITE"
     }
     try:
         color = get_key("prompt_color")
@@ -19,13 +19,12 @@ def _color_prompt(text: str, bold: bool = False):
             color = 2
     except ValueError:
         color = 2
-    output = ""
+    bold_str = ""
     if bold:
-        output = Style.BRIGHT
-    output += colors[color] + text + Fore.RESET
+        bold_str = "BOLD_"
+    output = f"{{{bold_str + colors[color]}}}{text}{{RESET}}"
     set_key("prompt_color", color+1)
     return output
 
 def _reset_colors():
-    from colorama import Style, Fore
-    return Style.RESET_ALL
+    return "{RESET}"

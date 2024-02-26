@@ -1,6 +1,6 @@
 xontrib load vox
 
-# general shit
+# prompt setup
 source "~/xsh/color_prompt.xsh"
 if $HOSTNAME == "riley-laptop":
 	identifier = "<3"
@@ -15,16 +15,22 @@ else:
 
 identifier = _color_prompt(identifier)
 cwd_base = _color_prompt("{cwd_base}", bold=True)
-prompt =  '{env_name: {}}' + identifier + ' ' + cwd_base + ' ) ' + _reset_colors()
+env = '{env_name: {}}'
+prompt =  f" {identifier} {cwd_base} ) "
 $PROMPT = prompt
 $XONSH_COLOR_STYLE = 'default'
 
+# general shit
 source "~/xsh/functions.xsh"
 source "~/xsh/exceptions.xsh"
 source "~/xsh/aliases.xsh"
+
 # Windows Subsystem for Linux stuff
 if in_wsl():
 	$GPG_TTY=$(tty)  # allows gpg to work inside WSL
+
+# set editor
+$EDITOR = "vim"
 
 # path stuff
 append_path("~/addins")
