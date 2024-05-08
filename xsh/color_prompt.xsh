@@ -1,9 +1,6 @@
 source "~/xsh/keys.xsh"
 
 def _color_prompt(text: str, bold: bool = False):
-    import random
-    from colorama import Style, Fore
-    from pathlib import Path
     colors = {
         2: "RED",
         3: "GREEN",
