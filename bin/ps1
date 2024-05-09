@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+from pathlib import Path
+import json
+import platform
+
+
+# TODO: Create a CLI for configuring the PS1 per host
+# TODO: Add support for custom fields in the PS1 (e.g. git branch, virtualenv, etc.)
+
+ansi_colors = {
+    "default": 39,  # or "no color"
+    "black": 30,
+    "red": 31,
+    "green": 32,
+    "yellow": 33,
+    "blue": 34,
+    "purple": 35,
+    "cyan": 36,
+    "white": 37,
+    "bright_black": 90,
+    "bright_red": 91,
+    "bright_green": 92,
+    "bright_yellow": 93,
+    "bright_blue": 94,
+    "bright_purple": 95,
+    "bright_cyan": 96,
+    "bright_white": 97,
+}
+
+ansi_styles = {
+    "bold": 1,
+    "dim": 2,
+    "italic": 3,
+    "underline": 4,
+    "blink": 5,
+    "reverse": 7,
+    "hidden": 8,
+    "strikethrough": 9,
+    "reset_all": 0,
+}
+
+
+def generate_ansi_code(fg_color: str, styles: list, bg_color: str = None) -> str:
+    """
+    Generate an ANSI escape code for text styling.
+
+    Args:
+        fg_color (str): The foreground color.
+        bg_color (str): The background color.
+        styles (list): A list of styles to apply.
+
+    Returns:
+        str: The ANSI escape code.
+    """
+    code = "\033["
+    if fg_color:
+        code += f"{ansi_colors[fg_color]};"
+    if bg_color is not None:
+        code += f"{ansi_colors[bg_color] + 10};"
+    else:
+        code += "49;"
+    for style in styles:
+        code += f"{ansi_styles[style]};"
+    code = code.rstrip(";")
+    code += "m"
+    return code
+
+
+def _load_jsonc(filepath: Path) -> dict:  # pulled from mc-radical-wrapper
+    """
+    Process a .jsonc file and return a JSON object. Comments are removed.
+
+    Args:
+        filepath (Path): The path to the JSON file.
+    """
+    with filepath.open() as fp:
+        json_text = fp.read()
+    for line in json_text.splitlines():
+        if line.startswith("//"):
+            json_text = json_text.replace(line, "")
+        json_text = json_text.replace(line, line.split("// ")[0])
+    return json.loads(json_text)
+
+
+RESET = generate_ansi_code("default", ["reset_all"])
+
+ps1_data = _load_jsonc(Path().home().joinpath('.config/ps1.jsonc'))
+
+hostname = platform.node()
+host_ps1 = ps1_data['hosts']['default']
+
+# Update the default values with the host-specific values
+if hostname in ps1_data['hosts']:
+    for key in ps1_data['hosts']['default']:
+        if key in ps1_data['hosts'][hostname]:
+            host_ps1[key].update(ps1_data['hosts'][hostname][key])
+
+host_ps1['host'].update({"text": ps1_data['host_text'][host_ps1['host']['text']]})
+
+host_fg_color = host_ps1['host']['color']
+host_styles = host_ps1['host']['styles']
+host_text = host_ps1['host']['text']
+
+host = generate_ansi_code(host_fg_color, host_styles) + host_text
+
+path_fg_color = host_ps1['path']['color']
+path_styles = host_ps1['path']['styles']
+
+path = generate_ansi_code(path_fg_color, path_styles)
+
+separator_fg_color = host_ps1['separator']['color']
+separator_styles = host_ps1['separator']['styles']
+separator_text = host_ps1['separator']['text']
+
+separator = generate_ansi_code(separator_fg_color, separator_styles) + separator_text
+
+print(f"{host}\n{path}\n{separator}\n{RESET}")
+# the return value is formatted ANSI escape codes for the host, path, and separator
+# the host and separator have the text included, the path does not, which is the terminal's responsibility

@@ -1,22 +1,9 @@
 xontrib load vox
 
 # prompt setup
-source "~/xsh/color_prompt.xsh"
-if $HOSTNAME == "riley-laptop":
-	identifier = "<3"
-elif $HOSTNAME == "riley-server":
-	identifier = "<>"
-elif $HOSTNAME == "tilde.town":
-  identifier = ">3"
-elif $HOSTNAME == "riley-desktop":
-	identifier = "><"
-else:
-	identifier = "<?"
-
-identifier = _color_prompt(identifier)
-cwd_base = _color_prompt("{cwd_base}", bold=True)
-env = '{env_name: {}}'
-prompt =  f" {identifier} {cwd_base} ) "
+ps1_vals = $(~/bin/ps1)
+host_text, path_colors, separator_text, RESET = ps1_vals.split()
+prompt =  f" {host_text}{RESET} {path_colors}{{cwd_base}}{RESET} {separator_text}{RESET} "
 $PROMPT = prompt
 $XONSH_COLOR_STYLE = 'default'
 
@@ -30,7 +17,10 @@ if in_wsl():
 	$GPG_TTY=$(tty)  # allows gpg to work inside WSL
 
 # set editor
-$EDITOR = "vim"
+$EDITOR = "micro"
+
+# micro vars
+$MICRO_TRUECOLOR=1
 
 # path stuff
 append_path("~/addins")
