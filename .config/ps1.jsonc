@@ -1,0 +1,64 @@
+// This file contains variables that are used by the PS2 prompt. It is a JSON file, but with comments.
+// The color-type combination should be unique for each host, but the text can be the same for multiple hosts.
+// The "default" object is used as a fallback for any host that is not explicitly defined.
+
+{
+    "host_text": {  // these are the different types of hosts that can be displayed, and their corresponding text
+        "local": "<3",
+        "remote": "<>",
+        "tilde": ">3",
+        "default": "->"
+    },
+    "hosts": {  // colors are ANSI color codes, see https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
+        "riley-laptop": {
+            "host": {
+                "text": "local",
+                "color": "bright_red"
+            }
+        },
+        "riley-desktop": { // if I ever get a desktop, lol
+            "host": {
+                "text": "local",
+                "color": "bright_yellow"
+            }
+        },
+        "riley-server": {
+            "host": {
+                "text": "remote",
+                "color": "bright_cyan"
+            }
+        },
+        "tilde.town": {
+            "host": {
+                "text": "tilde",
+                "color": "bright_purple"
+            }
+        },
+        "Riley-P52": {  // trinoor laptop :)
+            "host": {
+                "text": "local",
+                "color": "bright_purple"
+            }
+        },
+        "default": {  // by default, the text is gray. values are selectively overridden by the above objects
+            "host": {
+                "text": "default",
+                "color": "bright_white",
+                "styles": ["bold"]
+            },
+            "git_branch": {
+                "color": "bright_white",
+                "styles": ["underline"]
+            },
+            "path": {  // the path is displayed in a different color
+                "color": "blue",
+                "styles": ["bold"]
+            },
+            "separator": {  // the separator between commands is displayed in a different color
+                "text": ")",
+                "color": "white",
+                "styles": []
+            }
+        }
+    }
+}
