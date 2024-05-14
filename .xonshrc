@@ -56,6 +56,8 @@ $VOX_DEFAULT_INTERPRETER = "/usr/bin/python3.11"
 
 @events.autovox_policy
 def auto_based_on_dir(path, **_):
+	if not Path.home().joinpath(".virtualenvs").exists():
+		return
 	for venv in Path.home().joinpath(".virtualenvs").iterdir():
 		project_file = venv.joinpath(".project")
 		if project_file.exists() and project_file.read_text().strip() == str(path):
