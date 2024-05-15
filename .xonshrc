@@ -1,9 +1,11 @@
-xontrib load vox
+xontrib load vox autovox
+
+from pathlib import Path #  i just use this enough lol
 
 # prompt setup
 ps1_vals = $(~/bin/ps1)
 host_text, path_colors, separator_text, RESET = ps1_vals.split()
-prompt =  f" {host_text}{RESET} {path_colors}{{cwd_base}}{RESET} {separator_text}{RESET} "
+prompt =  f"{{env_name: {{}}}}{host_text}{RESET} {path_colors}{{cwd_base}}{RESET} {separator_text}{RESET} "
 $PROMPT = prompt
 $XONSH_COLOR_STYLE = 'default'
 
@@ -14,6 +16,18 @@ source "~/xsh/aliases.xsh"
 
 # Windows Subsystem for Linux stuff
 if in_wsl():
+	new_path = []
+	for path in $PATH:  # remove windows executables clogging up my path :(
+		path = Path(path)
+		try:
+			if not path.exists():
+				continue
+		except PermissionError:
+			continue
+		if Path('/mnt/c') in path.parents:
+			continue
+		new_path.append(path)
+	$PATH=new_path
 	$GPG_TTY=$(tty)  # allows gpg to work inside WSL
 
 # set editor
@@ -36,3 +50,15 @@ $LESS_TERMCAP_so = "\033[01;44;36m"  # begin standout-mode (bottom of screen)
 $LESS_TERMCAP_se = "\033[0m"         # end standout-mode
 
 load_aliases()
+
+# vox is xonsh's python environment manager
+$VOX_DEFAULT_INTERPRETER = "/usr/bin/python3.11"
+
+@events.autovox_policy
+def auto_based_on_dir(path, **_):
+	if not Path.home().joinpath(".virtualenvs").exists():
+		return
+	for venv in Path.home().joinpath(".virtualenvs").iterdir():
+		project_file = venv.joinpath(".project")
+		if project_file.exists() and project_file.read_text().strip() == str(path):
+			return venv
