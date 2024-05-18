@@ -33,6 +33,6 @@ curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 # run DE dependent setup script
-if [[ $DESKTOP_SESSION = "plasma" ]]; then
+if [ $DESKTOP_SESSION = "plasma" ]; then
 		source ~/sh/plasma_setup.sh
-fi
+fi  # is this syntax correct?
